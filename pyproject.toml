@@ -17,6 +17,13 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/specify_cli"]
+include = [
+    "dist/**/*",
+    "package.json",
+    "node_modules/**/*"
+]
 
 [tool.hatch.build.sources]
 "src" = ""
+"dist" = "dist"
+"package.json" = "package.json"
