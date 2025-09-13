@@ -109,6 +109,11 @@ export class InitProjectCommand {
     await fs.ensureDir(path.join(specifyDir, 'scripts', 'bash'));
     await fs.ensureDir(path.join(specifyDir, 'scripts', 'powershell'));
     await fs.ensureDir(path.join(specifyDir, 'state'));
+    await fs.ensureDir(path.join(specifyDir, 'templates'));
+    await fs.ensureDir(path.join(specifyDir, 'memory'));
+
+    // Create AI tool configuration directories
+    await this.setupAIToolCommands(targetDir, options.ai || 'claude');
 
     // Create specs directory
     const specsDir = path.join(targetDir, 'specs');
@@ -282,6 +287,212 @@ build/
     }
 
     console.log(chalk.green('✅ Project structure created'));
+  }
+
+  private async setupAIToolCommands(targetDir: string, aiModel: AIModelType): Promise<void> {
+    // Find the spec-kit installation directory (where this script is running from)
+    const currentRepoRoot = this.findSpecKitRoot();
+
+    // Only copy files if we're not initializing in the spec-kit repo itself
+    if (path.resolve(targetDir) !== path.resolve(currentRepoRoot)) {
+      // Copy .specify templates and scripts
+      await this.copySpecifyAssets(targetDir, currentRepoRoot);
+    } else {
+      console.log(chalk.yellow('📍 Initializing in spec-kit repo, skipping asset copy'));
+    }
+
+    // Setup AI-specific commands
+    switch (aiModel) {
+      case 'claude':
+        await this.setupClaudeCommands(targetDir, currentRepoRoot);
+        break;
+      case 'gemini':
+        await this.setupGeminiCommands(targetDir, currentRepoRoot);
+        break;
+      case 'copilot':
+        await this.setupCopilotCommands(targetDir, currentRepoRoot);
+        break;
+      default:
+        console.log(chalk.yellow(`⚠️ Unknown AI model: ${aiModel}, setting up Claude commands as default`));
+        await this.setupClaudeCommands(targetDir, currentRepoRoot);
+    }
+  }
+
+  private findSpecKitRoot(): string {
+    // Look for the spec-kit root by finding .specify directory
+    let currentDir = __dirname;
+
+    // Go up from dist/cli to find repo root
+    while (currentDir !== path.dirname(currentDir)) {
+      const specifyDir = path.join(currentDir, '.specify');
+      if (fs.existsSync(specifyDir)) {
+        return currentDir;
+      }
+      currentDir = path.dirname(currentDir);
+    }
+
+    // Fallback to current working directory
+    return process.cwd();
+  }
+
+  private async copySpecifyAssets(targetDir: string, sourceRoot: string): Promise<void> {
+    const sourceSpecifyDir = path.join(sourceRoot, '.specify');
+    const targetSpecifyDir = path.join(targetDir, '.specify');
+
+    // Copy templates
+    const sourceTemplatesDir = path.join(sourceSpecifyDir, 'templates');
+    const targetTemplatesDir = path.join(targetSpecifyDir, 'templates');
+    if (await fs.pathExists(sourceTemplatesDir)) {
+      await fs.copy(sourceTemplatesDir, targetTemplatesDir);
+    }
+
+    // Copy scripts
+    const sourceScriptsDir = path.join(sourceSpecifyDir, 'scripts');
+    const targetScriptsDir = path.join(targetSpecifyDir, 'scripts');
+    if (await fs.pathExists(sourceScriptsDir)) {
+      await fs.copy(sourceScriptsDir, targetScriptsDir);
+    }
+
+    // Copy memory
+    const sourceMemoryDir = path.join(sourceSpecifyDir, 'memory');
+    const targetMemoryDir = path.join(targetSpecifyDir, 'memory');
+    if (await fs.pathExists(sourceMemoryDir)) {
+      await fs.copy(sourceMemoryDir, targetMemoryDir);
+    }
+  }
+
+  private async setupClaudeCommands(targetDir: string, sourceRoot: string): Promise<void> {
+    const claudeDir = path.join(targetDir, '.claude');
+    const commandsDir = path.join(claudeDir, 'commands');
+    await fs.ensureDir(commandsDir);
+
+    // Copy Claude commands only if source and target are different
+    const sourceClaudeDir = path.join(sourceRoot, '.claude');
+    if (await fs.pathExists(sourceClaudeDir) && path.resolve(targetDir) !== path.resolve(sourceRoot)) {
+      await fs.copy(sourceClaudeDir, claudeDir);
+      console.log(chalk.green('✅ Claude slash commands configured'));
+    } else if (path.resolve(targetDir) === path.resolve(sourceRoot)) {
+      console.log(chalk.green('✅ Claude commands already exist in current directory'));
+    } else {
+      console.log(chalk.yellow('⚠️ No Claude commands found in source'));
+    }
+  }
+
+  private async setupGeminiCommands(targetDir: string, sourceRoot: string): Promise<void> {
+    // Create GEMINI.md file with slash commands
+    const geminiMdPath = path.join(targetDir, 'GEMINI.md');
+    const geminiContent = `# Gemini CLI Commands
+
+This file contains custom commands for use with Gemini CLI.
+
+## Available Commands
+
+### /specify
+Create or update feature specifications from natural language descriptions.
+
+\`\`\`bash
+gemini /specify "Build a user authentication system with login and signup"
+\`\`\`
+
+### /plan
+Generate technical implementation plans with architecture details.
+
+\`\`\`bash
+gemini /plan "Use React with TypeScript, Node.js backend with Express, PostgreSQL database"
+\`\`\`
+
+### /tasks
+Break down features into actionable development tasks.
+
+\`\`\`bash
+gemini /tasks "Generate tasks for the authentication system implementation"
+\`\`\`
+
+## Usage
+
+1. Use \`gemini /specify\` to create specifications
+2. Use \`gemini /plan\` to create implementation plans
+3. Use \`gemini /tasks\` to generate task breakdowns
+
+These commands integrate with the spec-kit workflow and use the templates in \`.specify/templates/\`.
+`;
+
+    await fs.writeFile(geminiMdPath, geminiContent);
+    console.log(chalk.green('✅ Gemini commands configured in GEMINI.md'));
+  }
+
+  private async setupCopilotCommands(targetDir: string, sourceRoot: string): Promise<void> {
+    // Create .vscode directory for Copilot commands
+    const vscodeDir = path.join(targetDir, '.vscode');
+    await fs.ensureDir(vscodeDir);
+
+    // Create Copilot slash commands configuration
+    const copilotConfig = {
+      "copilot.chat.commands": [
+        {
+          "name": "specify",
+          "description": "Create or update feature specifications from natural language",
+          "systemMessage": "Given the feature description, create a detailed specification using the template in .specify/templates/spec-template.md. Run .specify/scripts/bash/create-new-feature.sh first to set up the branch and files."
+        },
+        {
+          "name": "plan",
+          "description": "Generate technical implementation plans with architecture details",
+          "systemMessage": "Create a technical implementation plan using .specify/templates/plan-template.md. Run .specify/scripts/bash/setup-plan.sh to prepare the planning workflow."
+        },
+        {
+          "name": "tasks",
+          "description": "Break down features into actionable development tasks",
+          "systemMessage": "Generate actionable tasks using .specify/templates/tasks-template.md. Run .specify/scripts/bash/check-task-prerequisites.sh to check requirements."
+        }
+      ]
+    };
+
+    const settingsPath = path.join(vscodeDir, 'settings.json');
+    await fs.writeJSON(settingsPath, copilotConfig, { spaces: 2 });
+
+    // Also create COPILOT.md documentation
+    const copilotMdPath = path.join(targetDir, 'COPILOT.md');
+    const copilotContent = `# GitHub Copilot Commands
+
+This file documents custom slash commands for use with GitHub Copilot in VS Code.
+
+## Available Commands
+
+### /specify
+Create or update feature specifications from natural language descriptions.
+
+Usage in VS Code:
+1. Open Copilot Chat
+2. Type: \`/specify Build a user authentication system with login and signup\`
+
+### /plan
+Generate technical implementation plans with architecture details.
+
+Usage in VS Code:
+1. Open Copilot Chat
+2. Type: \`/plan Use React with TypeScript, Node.js backend with Express, PostgreSQL database\`
+
+### /tasks
+Break down features into actionable development tasks.
+
+Usage in VS Code:
+1. Open Copilot Chat
+2. Type: \`/tasks Generate tasks for the authentication system implementation\`
+
+## Setup
+
+The commands are configured in \`.vscode/settings.json\` and integrate with spec-kit templates in \`.specify/templates/\`.
+
+## Workflow
+
+1. Use \`/specify\` to create specifications
+2. Use \`/plan\` to create implementation plans
+3. Use \`/tasks\` to generate task breakdowns
+4. Implement following the generated plans and tasks
+`;
+
+    await fs.writeFile(copilotMdPath, copilotContent);
+    console.log(chalk.green('✅ GitHub Copilot commands configured'));
   }
 
   private isValidAIModel(model: string): model is AIModelType {
