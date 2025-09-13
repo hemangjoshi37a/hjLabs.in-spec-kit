@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc && tsc-alias",
+    "build:bundle": "tsc && tsc-alias && esbuild dist/cli/index.js --bundle --platform=node --outfile=dist/cli/bundle.js",
     "dev": "ts-node src/cli/index.ts",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -44,6 +45,7 @@
     "@types/yargs-parser": "^21.0.3",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "esbuild": "^0.25.9",
     "eslint": "^8.50.0",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-prettier": "^5.0.0",

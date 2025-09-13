@@ -24,9 +24,9 @@ console = Console()
 
 def get_node_cli_path():
     """Get the path to the Node.js CLI executable."""
-    # Use the embedded JavaScript CLI
+    # Use the bundled JavaScript CLI
     package_dir = Path(__file__).parent
-    node_cli = package_dir / "js_cli" / "cli" / "index.js"
+    node_cli = package_dir / "js_cli" / "bundle.js"
 
     if node_cli.exists():
         return str(node_cli)
