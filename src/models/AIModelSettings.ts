@@ -1,5 +1,5 @@
 export interface AIModelSettings {
-  modelType: 'claude' | 'gemini';
+  modelType: 'claude' | 'gemini' | 'copilot';
   version: string;
   capabilities: ModelCapabilities;
   configuration: ModelConfiguration;
@@ -118,9 +118,49 @@ export class AIModelSettingsProvider {
         minimumCliVersion: '0.1.0',
       },
     },
+    copilot: {
+      modelType: 'copilot',
+      version: '1.0',
+      capabilities: {
+        maxTokens: 8000,
+        supportedFormats: ['text', 'code'],
+        features: [
+          {
+            name: 'code-generation',
+            enabled: true,
+            description: 'AI-powered code completion and generation',
+            requirements: ['github-copilot-extension'],
+          },
+          {
+            name: 'code-explanation',
+            enabled: true,
+            description: 'Explain existing code',
+          },
+          {
+            name: 'refactoring',
+            enabled: true,
+            description: 'Suggest code improvements',
+          },
+        ],
+        rateLimit: {
+          requestsPerMinute: 100,
+          tokensPerMinute: 200000,
+        },
+      },
+      configuration: {
+        temperature: 0.6,
+        maxOutputTokens: 1024,
+        customSettings: {},
+      },
+      compatibility: {
+        supportedVersions: ['1.0'],
+        migrationSupport: true,
+        minimumCliVersion: '0.1.0',
+      },
+    },
   };
 
-  static getSettings(modelType: 'claude' | 'gemini'): AIModelSettings | null {
+  static getSettings(modelType: 'claude' | 'gemini' | 'copilot'): AIModelSettings | null {
     return this.MODEL_DEFINITIONS[modelType] || null;
   }
 
@@ -129,7 +169,7 @@ export class AIModelSettingsProvider {
   }
 
   static isCompatible(
-    modelType: 'claude' | 'gemini',
+    modelType: 'claude' | 'gemini' | 'copilot',
     cliVersion: string
   ): boolean {
     const settings = this.getSettings(modelType);

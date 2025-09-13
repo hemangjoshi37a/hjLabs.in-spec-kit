@@ -1,7 +1,9 @@
+export type AIModelType = 'claude' | 'gemini' | 'copilot';
+
 export interface ProjectConfig {
   projectId: string;
   name: string;
-  aiModel: 'claude' | 'gemini';
+  aiModel: AIModelType;
   version: string;
   createdAt: string;
   updatedAt: string;
@@ -13,8 +15,8 @@ export interface ProjectConfig {
 
 export interface MigrationRecord {
   id: string;
-  fromModel: 'claude' | 'gemini';
-  toModel: 'claude' | 'gemini';
+  fromModel: AIModelType;
+  toModel: AIModelType;
   timestamp: string;
   success: boolean;
   backupPath?: string;
@@ -32,7 +34,7 @@ export class ProjectConfigValidator {
     return (
       typeof c.projectId === 'string' &&
       typeof c.name === 'string' &&
-      (c.aiModel === 'claude' || c.aiModel === 'gemini') &&
+      (c.aiModel === 'claude' || c.aiModel === 'gemini' || c.aiModel === 'copilot') &&
       typeof c.version === 'string' &&
       typeof c.createdAt === 'string' &&
       typeof c.updatedAt === 'string' &&
@@ -46,7 +48,7 @@ export class ProjectConfigValidator {
   static create(params: {
     projectId: string;
     name: string;
-    aiModel: 'claude' | 'gemini';
+    aiModel: AIModelType;
     specDirectory: string;
     configPath: string;
   }): ProjectConfig {

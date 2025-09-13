@@ -208,7 +208,7 @@ export class ModelSwitcher {
 
   private async updateProjectConfig(
     config: ProjectConfig,
-    targetModel: 'claude' | 'gemini',
+    targetModel: 'claude' | 'gemini' | 'copilot',
     migrationId: string
   ): Promise<ProjectConfig> {
     const updatedConfig: ProjectConfig = {

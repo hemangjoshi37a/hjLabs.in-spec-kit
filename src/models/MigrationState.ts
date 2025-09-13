@@ -2,8 +2,8 @@ export type MigrationStatus = 'pending' | 'in_progress' | 'completed' | 'failed'
 
 export interface MigrationState {
   id: string;
-  fromModel: 'claude' | 'gemini';
-  toModel: 'claude' | 'gemini';
+  fromModel: 'claude' | 'gemini' | 'copilot';
+  toModel: 'claude' | 'gemini' | 'copilot';
   projectId: string;
   status: MigrationStatus;
   startedAt: string;
@@ -66,8 +66,8 @@ export interface MigrationMetadata {
 
 export class MigrationStateManager {
   static create(params: {
-    fromModel: 'claude' | 'gemini';
-    toModel: 'claude' | 'gemini';
+    fromModel: 'claude' | 'gemini' | 'copilot';
+    toModel: 'claude' | 'gemini' | 'copilot';
     projectId: string;
     backupPath: string;
     dryRun?: boolean;
@@ -104,8 +104,8 @@ export class MigrationStateManager {
   }
 
   private static getDefaultSteps(
-    fromModel: 'claude' | 'gemini',
-    toModel: 'claude' | 'gemini'
+    fromModel: 'claude' | 'gemini' | 'copilot',
+    toModel: 'claude' | 'gemini' | 'copilot'
   ): MigrationStep[] {
     const baseSteps: Omit<MigrationStep, 'id'>[] = [
       {

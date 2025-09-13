@@ -2969,6 +2969,46 @@ var require_AIModelSettings = __commonJS({
           migrationSupport: true,
           minimumCliVersion: "0.1.0"
         }
+      },
+      copilot: {
+        modelType: "copilot",
+        version: "1.0",
+        capabilities: {
+          maxTokens: 8e3,
+          supportedFormats: ["text", "code"],
+          features: [
+            {
+              name: "code-generation",
+              enabled: true,
+              description: "AI-powered code completion and generation",
+              requirements: ["github-copilot-extension"]
+            },
+            {
+              name: "code-explanation",
+              enabled: true,
+              description: "Explain existing code"
+            },
+            {
+              name: "refactoring",
+              enabled: true,
+              description: "Suggest code improvements"
+            }
+          ],
+          rateLimit: {
+            requestsPerMinute: 100,
+            tokensPerMinute: 2e5
+          }
+        },
+        configuration: {
+          temperature: 0.6,
+          maxOutputTokens: 1024,
+          customSettings: {}
+        },
+        compatibility: {
+          supportedVersions: ["1.0"],
+          migrationSupport: true,
+          minimumCliVersion: "0.1.0"
+        }
       }
     };
   }
@@ -5383,7 +5423,7 @@ var require_ProjectConfig = __commonJS({
           return false;
         }
         const c = config;
-        return typeof c.projectId === "string" && typeof c.name === "string" && (c.aiModel === "claude" || c.aiModel === "gemini") && typeof c.version === "string" && typeof c.createdAt === "string" && typeof c.updatedAt === "string" && typeof c.specDirectory === "string" && typeof c.configPath === "string" && typeof c.isInitialized === "boolean" && Array.isArray(c.migrationHistory);
+        return typeof c.projectId === "string" && typeof c.name === "string" && (c.aiModel === "claude" || c.aiModel === "gemini" || c.aiModel === "copilot") && typeof c.version === "string" && typeof c.createdAt === "string" && typeof c.updatedAt === "string" && typeof c.specDirectory === "string" && typeof c.configPath === "string" && typeof c.isInitialized === "boolean" && Array.isArray(c.migrationHistory);
       }
       static create(params) {
         const now = (/* @__PURE__ */ new Date()).toISOString();
@@ -8383,6 +8423,292 @@ ${progressBar}
   }
 });
 
+// dist/cli/InitProjectCommand.js
+var require_InitProjectCommand = __commonJS({
+  "dist/cli/InitProjectCommand.js"(exports2) {
+    "use strict";
+    var __createBinding2 = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      var desc = Object.getOwnPropertyDescriptor(m, k);
+      if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+        desc = { enumerable: true, get: function() {
+          return m[k];
+        } };
+      }
+      Object.defineProperty(o, k2, desc);
+    }) : (function(o, m, k, k2) {
+      if (k2 === void 0) k2 = k;
+      o[k2] = m[k];
+    }));
+    var __setModuleDefault2 = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
+      Object.defineProperty(o, "default", { enumerable: true, value: v });
+    }) : function(o, v) {
+      o["default"] = v;
+    });
+    var __importStar2 = exports2 && exports2.__importStar || /* @__PURE__ */ (function() {
+      var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function(o2) {
+          var ar = [];
+          for (var k in o2) if (Object.prototype.hasOwnProperty.call(o2, k)) ar[ar.length] = k;
+          return ar;
+        };
+        return ownKeys(o);
+      };
+      return function(mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) {
+          for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding2(result, mod, k[i]);
+        }
+        __setModuleDefault2(result, mod);
+        return result;
+      };
+    })();
+    var __importDefault2 = exports2 && exports2.__importDefault || function(mod) {
+      return mod && mod.__esModule ? mod : { "default": mod };
+    };
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.InitProjectCommand = void 0;
+    var commander_12 = require_commander();
+    var chalk_12 = __importDefault2(require_source());
+    var fs2 = __importStar2(require_lib());
+    var path2 = __importStar2(require("path"));
+    var InitProjectCommand = class {
+      create() {
+        return new commander_12.Command("init").argument("[project-name]", "Name of the project to initialize").option("--here", "Initialize in the current directory").option("--ai <type>", "AI agent type (claude, gemini, copilot)").option("--script <type>", "Script type (sh, ps)", "sh").option("--ignore-agent-tools", "Skip agent tools validation").option("--force", "Overwrite existing spec-kit configuration").description("Initialize a new spec-kit project").action((projectName, options) => this.execute(projectName, options));
+      }
+      async execute(projectName, options) {
+        try {
+          console.log(chalk_12.default.blue("\u{1F680} Initializing spec-kit project...\n"));
+          if (!projectName && !options.here) {
+            console.error(chalk_12.default.red("\u274C Please specify a project name or use --here flag"));
+            console.log(chalk_12.default.yellow("\nExamples:"));
+            console.log("  specify init my-project");
+            console.log("  specify init --here");
+            process.exit(1);
+          }
+          let targetDir;
+          let projectNameForConfig;
+          if (options.here) {
+            targetDir = process.cwd();
+            projectNameForConfig = path2.basename(targetDir);
+            console.log(chalk_12.default.cyan(`\u{1F4CD} Initializing in current directory: ${targetDir}`));
+          } else if (projectName) {
+            targetDir = path2.join(process.cwd(), projectName);
+            projectNameForConfig = projectName;
+            console.log(chalk_12.default.cyan(`\u{1F4CD} Creating new project: ${projectName}`));
+          } else {
+            throw new Error("Invalid arguments");
+          }
+          if (!options.here && fs2.existsSync(targetDir)) {
+            if (!options.force) {
+              console.error(chalk_12.default.red(`\u274C Directory ${projectName} already exists`));
+              console.log(chalk_12.default.yellow("Use --force to overwrite existing directory"));
+              process.exit(1);
+            }
+          }
+          if (!options.here) {
+            await fs2.ensureDir(targetDir);
+          }
+          await this.createBasicStructure(targetDir, projectNameForConfig, options);
+          console.log(chalk_12.default.green("\n\u2705 Spec-kit project initialized successfully!\n"));
+          console.log(chalk_12.default.white("\u{1F4CB} Next steps:"));
+          if (!options.here) {
+            console.log(`  1. cd ${projectName}`);
+          } else {
+            console.log("  1. You're ready to go!");
+          }
+          console.log("  2. Start with: /specify <your-feature-description>");
+          console.log("  3. Then use: /plan and /tasks");
+          console.log("  4. Track progress with: specify track-tasks enable");
+          console.log(chalk_12.default.white("\n\u{1F527} Available commands:"));
+          console.log("  specify detect-project   - Validate project setup");
+          console.log("  specify list-models      - See available AI models");
+          console.log("  specify switch-model     - Change AI model");
+          console.log("  specify track-tasks      - Manage task tracking");
+          console.log(chalk_12.default.gray('\nRun "specify --help" for more information'));
+        } catch (error) {
+          console.error(chalk_12.default.red(`\u274C Failed to initialize project: ${error.message}`));
+          process.exit(1);
+        }
+      }
+      async createBasicStructure(targetDir, projectName, options) {
+        console.log(chalk_12.default.cyan("\u{1F4C2} Creating project structure..."));
+        const specifyDir = path2.join(targetDir, ".specify");
+        await fs2.ensureDir(specifyDir);
+        await fs2.ensureDir(path2.join(specifyDir, "scripts"));
+        await fs2.ensureDir(path2.join(specifyDir, "scripts", "bash"));
+        await fs2.ensureDir(path2.join(specifyDir, "scripts", "powershell"));
+        await fs2.ensureDir(path2.join(specifyDir, "state"));
+        const specsDir = path2.join(targetDir, "specs");
+        await fs2.ensureDir(specsDir);
+        const aiModel = options.ai || "claude";
+        const config = {
+          projectId: `proj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: projectName,
+          aiModel,
+          version: "0.1.0",
+          createdAt: (/* @__PURE__ */ new Date()).toISOString(),
+          updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+          specDirectory: specsDir,
+          configPath: path2.join(specifyDir, "config.json"),
+          isInitialized: true,
+          migrationHistory: []
+        };
+        const configPath = path2.join(specifyDir, "config.json");
+        await fs2.writeJSON(configPath, config, { spaces: 2 });
+        const specsReadme = `# Specifications Directory
+
+This directory contains all feature specifications, implementation plans, and task breakdowns.
+
+## Structure
+
+Each feature should have its own directory with the following structure:
+
+\`\`\`
+specs/
+\u251C\u2500\u2500 001-feature-name/
+\u2502   \u251C\u2500\u2500 spec.md          # Feature specification
+\u2502   \u251C\u2500\u2500 plan.md          # Implementation plan
+\u2502   \u251C\u2500\u2500 tasks.md         # Task breakdown
+\u2502   \u251C\u2500\u2500 research.md      # Research notes (optional)
+\u2502   \u251C\u2500\u2500 data-model.md    # Data model (if applicable)
+\u2502   \u251C\u2500\u2500 quickstart.md    # Quick start guide (optional)
+\u2502   \u2514\u2500\u2500 contracts/       # API contracts and schemas
+\u2502       \u251C\u2500\u2500 api.yaml
+\u2502       \u2514\u2500\u2500 schema.json
+\u2514\u2500\u2500 README.md            # This file
+\`\`\`
+
+## Creating New Specifications
+
+Use the AI agent commands:
+
+1. \`/specify <feature-description>\` - Create a new specification
+2. \`/plan <feature-name>\` - Generate implementation plan
+3. \`/tasks <feature-name>\` - Break down into tasks
+
+## Naming Convention
+
+Use the format: \`NNN-feature-name\` where:
+- \`NNN\` is a zero-padded sequence number (001, 002, etc.)
+- \`feature-name\` is a kebab-case description
+`;
+        await fs2.writeFile(path2.join(specsDir, "README.md"), specsReadme);
+        const readmePath = path2.join(targetDir, "README.md");
+        if (!await fs2.pathExists(readmePath)) {
+          const projectReadme = `# ${projectName}
+
+## Overview
+
+This project uses hjLabs spec-kit for specification-driven development with AI assistance.
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 16+
+- Git
+- AI Agent: ${aiModel}
+
+### Development Workflow
+
+1. **Specify**: Create feature specifications using \`/specify\`
+2. **Plan**: Generate implementation plans using \`/plan\`
+3. **Tasks**: Break down into actionable tasks using \`/tasks\`
+4. **Implement**: Follow the generated plan and tasks
+5. **Track**: Monitor progress with task tracking
+
+### Available Commands
+
+- \`specify detect-project\` - Validate project setup
+- \`specify list-models\` - See available AI models
+- \`specify switch-model <type>\` - Change AI model
+- \`specify track-tasks <action>\` - Manage task tracking
+
+## Project Structure
+
+- \`specs/\` - Feature specifications and plans
+- \`.specify/\` - Configuration and automation scripts
+- \`README.md\` - This file
+
+## AI Model Configuration
+
+Current AI Model: **${aiModel}**
+
+Switch models with:
+\`\`\`bash
+specify switch-model claude    # For Claude
+specify switch-model gemini    # For Google Gemini
+specify switch-model copilot   # For GitHub Copilot
+\`\`\`
+
+## Contributing
+
+1. Create specifications before implementing
+2. Follow the generated implementation plans
+3. Track progress using the task system
+4. Update documentation as needed
+
+---
+
+*Generated by hjLabs spec-kit*
+`;
+          await fs2.writeFile(readmePath, projectReadme);
+        }
+        const gitignorePath = path2.join(targetDir, ".gitignore");
+        if (!await fs2.pathExists(gitignorePath)) {
+          const gitignoreContent = `# Spec-kit state files
+.specify/state/
+*.tmp
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Dependency directories
+node_modules/
+.npm
+.yarn
+
+# Build outputs
+dist/
+build/
+*.tgz
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+`;
+          await fs2.writeFile(gitignorePath, gitignoreContent);
+        }
+        console.log(chalk_12.default.green("\u2705 Project structure created"));
+      }
+      isValidAIModel(model) {
+        const validModels = ["claude", "gemini", "copilot"];
+        return validModels.includes(model);
+      }
+    };
+    exports2.InitProjectCommand = InitProjectCommand;
+  }
+});
+
 // dist/cli/index.js
 var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
   if (k2 === void 0) k2 = k;
@@ -8432,6 +8758,7 @@ var ListModelsCommand_1 = require_ListModelsCommand();
 var DetectProjectCommand_1 = require_DetectProjectCommand();
 var ResetProjectCommand_1 = require_ResetProjectCommand();
 var TrackTasksCommand_1 = require_TrackTasksCommand();
+var InitProjectCommand_1 = require_InitProjectCommand();
 var chalk_1 = __importDefault(require_source());
 var fs = __importStar(require_lib());
 var path = __importStar(require("path"));
@@ -8457,6 +8784,8 @@ var SpecifyCLI = class {
     this.program.name("specify").description("AI Model Switching and Task Tracking CLI for Spec-Driven Development").version(this.version, "-v, --version", "Output the current version").helpOption("-h, --help", "Display help for command");
   }
   setupCommands() {
+    const initProjectCmd = new InitProjectCommand_1.InitProjectCommand();
+    this.program.addCommand(initProjectCmd.create());
     const switchModelCmd = new SwitchModelCommand_1.SwitchModelCommand();
     this.program.addCommand(switchModelCmd.create());
     const listModelsCmd = new ListModelsCommand_1.ListModelsCommand();

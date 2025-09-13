@@ -6,6 +6,7 @@ import { ListModelsCommand } from './ListModelsCommand';
 import { DetectProjectCommand } from './DetectProjectCommand';
 import { ResetProjectCommand } from './ResetProjectCommand';
 import { TrackTasksCommand } from './TrackTasksCommand';
+import { InitProjectCommand } from './InitProjectCommand';
 import chalk from 'chalk';
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -42,6 +43,10 @@ class SpecifyCLI {
   }
 
   private setupCommands(): void {
+    // Init Project Command
+    const initProjectCmd = new InitProjectCommand();
+    this.program.addCommand(initProjectCmd.create());
+
     // Switch Model Command
     const switchModelCmd = new SwitchModelCommand();
     this.program.addCommand(switchModelCmd.create());
