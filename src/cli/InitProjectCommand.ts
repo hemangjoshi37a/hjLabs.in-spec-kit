@@ -319,19 +319,43 @@ build/
   }
 
   private findSpecKitRoot(): string {
-    // Look for the spec-kit root by finding .specify directory
-    let currentDir = __dirname;
+    // When installed via uvx/pip, templates are in the package directory
+    // When run from source, templates are in the repo root
 
-    // Go up from dist/cli to find repo root
+    // Method 1: Check if we're in the package (look for Python package structure)
+    let currentDir = __dirname;
     while (currentDir !== path.dirname(currentDir)) {
       const specifyDir = path.join(currentDir, '.specify');
+      const packageSpecifyDir = path.join(currentDir, 'specify_cli', '.specify');
+
       if (fs.existsSync(specifyDir)) {
         return currentDir;
+      }
+      if (fs.existsSync(packageSpecifyDir)) {
+        return path.join(currentDir, 'specify_cli');
       }
       currentDir = path.dirname(currentDir);
     }
 
+    // Method 2: Check working directory (for development)
+    if (fs.existsSync(path.join(process.cwd(), '.specify'))) {
+      return process.cwd();
+    }
+
+    // Method 3: Try to find package installation
+    try {
+      // This will work when installed as a Python package
+      const packagePath = require.resolve('../../package.json');
+      const packageDir = path.dirname(packagePath);
+      if (fs.existsSync(path.join(packageDir, '.specify'))) {
+        return packageDir;
+      }
+    } catch (e) {
+      // Ignore if package.json not found
+    }
+
     // Fallback to current working directory
+    console.log(chalk.yellow('⚠️ Could not find spec-kit templates, using current directory'));
     return process.cwd();
   }
 
