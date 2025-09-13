@@ -22,75 +22,29 @@ from rich.text import Text
 app = typer.Typer(help="AI Model Switching and Task Tracking CLI for Spec-Driven Development", no_args_is_help=True)
 console = Console()
 
-def get_package_root():
-    """Get the root directory of the installed package."""
-    return Path(__file__).parent.parent
-
-def setup_node_environment():
-    """Setup Node.js environment if needed."""
-    package_root = get_package_root()
-    package_json = package_root / "package.json"
-    node_modules = package_root / "node_modules"
-    dist_dir = package_root / "dist"
-
-    # Check if we have the Node.js files
-    if not package_json.exists():
-        console.print("[yellow]Setting up Node.js environment...[/yellow]")
-
-        # Check if Node.js is available
-        if not shutil.which("node"):
-            console.print()
-            console.print(Panel.fit(
-                "[red]Node.js is required but not found![/red]\n\n"
-                "Please install Node.js from: https://nodejs.org/\n"
-                "Or use your system's package manager:\n"
-                "  • Ubuntu/Debian: sudo apt install nodejs npm\n"
-                "  • macOS: brew install node\n"
-                "  • Windows: Download from nodejs.org",
-                title="Installation Required",
-                border_style="red"
-            ))
-            return False
-
-        if not shutil.which("npm"):
-            console.print()
-            console.print(Panel.fit(
-                "[red]npm is required but not found![/red]\n\n"
-                "npm usually comes with Node.js.\n"
-                "If you installed Node.js manually, please install npm as well.",
-                title="Installation Required",
-                border_style="red"
-            ))
-            return False
-
-        # Try to install dependencies in the package directory
-        try:
-            os.chdir(package_root)
-            console.print("Installing Node.js dependencies...")
-            subprocess.run(["npm", "install"], check=True, capture_output=True)
-
-            if not dist_dir.exists():
-                console.print("Building TypeScript...")
-                subprocess.run(["npm", "run", "build"], check=True, capture_output=True)
-
-        except subprocess.CalledProcessError as e:
-            console.print(f"[red]Failed to setup Node.js environment: {e}[/red]")
-            return False
-
-    return True
-
 def get_node_cli_path():
     """Get the path to the Node.js CLI executable."""
-    package_root = get_package_root()
-    node_cli = package_root / "dist" / "cli" / "index.js"
+    # Use the embedded JavaScript CLI
+    package_dir = Path(__file__).parent
+    node_cli = package_dir / "js_cli" / "cli" / "index.js"
 
     if node_cli.exists():
         return str(node_cli)
 
-    # Try to setup the environment
-    if setup_node_environment():
-        if node_cli.exists():
-            return str(node_cli)
+    # Check if Node.js is available
+    if not shutil.which("node"):
+        console.print()
+        console.print(Panel.fit(
+            "[red]Node.js is required but not found![/red]\n\n"
+            "Please install Node.js from: https://nodejs.org/\n"
+            "Or use your system's package manager:\n"
+            "  • Ubuntu/Debian: sudo apt install nodejs npm\n"
+            "  • macOS: brew install node\n"
+            "  • Windows: Download from nodejs.org",
+            title="Installation Required",
+            border_style="red"
+        ))
+        return None
 
     return None
 
