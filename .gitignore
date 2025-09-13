@@ -2,8 +2,9 @@
 node_modules/
 npm-debug.log*
 
-# Build output  
+# Build output
 dist/
+!dist/cli/bundle.js
 build/
 
 # Runtime data
