@@ -34,7 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConfigManager = void 0;
-const ProjectConfig_1 = require("@models/ProjectConfig");
+const ProjectConfig_1 = require("../models/ProjectConfig");
 const fs = __importStar(require("fs-extra"));
 const path = __importStar(require("path"));
 class ConfigManager {
@@ -133,7 +133,7 @@ class ConfigManager {
                 warnings.push('Specification directory does not exist');
             }
             // Check AI model validity
-            const { AIModelSettingsProvider } = await Promise.resolve().then(() => __importStar(require('@models/AIModelSettings')));
+            const { AIModelSettingsProvider } = await Promise.resolve().then(() => __importStar(require('../models/AIModelSettings')));
             if (!AIModelSettingsProvider.getSettings(config.aiModel)) {
                 errors.push(`Unknown AI model: ${config.aiModel}`);
             }

@@ -34,8 +34,8 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ModelSwitcher = void 0;
-const MigrationState_1 = require("@models/MigrationState");
-const AIModelSettings_1 = require("@models/AIModelSettings");
+const MigrationState_1 = require("../models/MigrationState");
+const AIModelSettings_1 = require("../models/AIModelSettings");
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs-extra"));
 class ModelSwitcher {

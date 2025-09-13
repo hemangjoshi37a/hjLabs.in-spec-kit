@@ -1,4 +1,4 @@
-import { ProjectConfig } from '@models/ProjectConfig';
+import { ProjectConfig } from '../models/ProjectConfig';
 export interface DetectionResult {
     found: boolean;
     projectPath?: string;

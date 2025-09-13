@@ -38,8 +38,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ResetProjectCommand = void 0;
 const commander_1 = require("commander");
-const ProjectDetector_1 = require("@services/ProjectDetector");
-const ConfigManager_1 = require("@services/ConfigManager");
+const ProjectDetector_1 = require("../services/ProjectDetector");
+const ConfigManager_1 = require("../services/ConfigManager");
 const chalk_1 = __importDefault(require("chalk"));
 const fs = __importStar(require("fs-extra"));
 const path = __importStar(require("path"));

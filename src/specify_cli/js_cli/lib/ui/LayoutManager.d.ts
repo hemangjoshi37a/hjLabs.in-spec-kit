@@ -1,6 +1,6 @@
 import blessed from 'blessed';
 import { TaskTrackingSidebar } from './TaskTrackingSidebar';
-import { TaskState } from '@models/TaskState';
+import { TaskState } from '../../models/TaskState';
 export interface LayoutConfiguration {
     sidebarEnabled: boolean;
     sidebarPosition: 'left' | 'right';

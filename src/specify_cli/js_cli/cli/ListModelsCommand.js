@@ -5,8 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ListModelsCommand = void 0;
 const commander_1 = require("commander");
-const AIModelSettings_1 = require("@models/AIModelSettings");
-const ProjectDetector_1 = require("@services/ProjectDetector");
+const AIModelSettings_1 = require("../models/AIModelSettings");
+const ProjectDetector_1 = require("../services/ProjectDetector");
 const chalk_1 = __importDefault(require("chalk"));
 class ListModelsCommand {
     constructor() {

@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DetectProjectCommand = void 0;
 const commander_1 = require("commander");
-const ProjectDetector_1 = require("@services/ProjectDetector");
+const ProjectDetector_1 = require("../services/ProjectDetector");
 const chalk_1 = __importDefault(require("chalk"));
 const path = __importStar(require("path"));
 class DetectProjectCommand {

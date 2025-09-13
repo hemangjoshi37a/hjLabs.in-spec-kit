@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SwitchModelCommand = void 0;
 const commander_1 = require("commander");
-const ModelSwitcher_1 = require("@services/ModelSwitcher");
-const ConfigManager_1 = require("@services/ConfigManager");
-const ProjectDetector_1 = require("@services/ProjectDetector");
+const ModelSwitcher_1 = require("../services/ModelSwitcher");
+const ConfigManager_1 = require("../services/ConfigManager");
+const ProjectDetector_1 = require("../services/ProjectDetector");
 const chalk_1 = __importDefault(require("chalk"));
 class SwitchModelCommand {
     constructor() {

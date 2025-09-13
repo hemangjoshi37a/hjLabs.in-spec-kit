@@ -168,7 +168,7 @@ class SpecifyCLI {
             console.log(`  Path: ${chalk_1.default.gray(validation.projectPath)}`);
             // Task status
             try {
-                const { TaskTracker } = await Promise.resolve().then(() => __importStar(require('@services/TaskTracker')));
+                const { TaskTracker } = await Promise.resolve().then(() => __importStar(require('../services/TaskTracker')));
                 const taskTracker = new TaskTracker(config);
                 await taskTracker.initialize();
                 const stats = taskTracker.getTaskStats();
@@ -188,7 +188,7 @@ class SpecifyCLI {
                 console.log(chalk_1.default.gray('\n📈 Task Status: No task data available'));
             }
             // Model compatibility
-            const { AIModelSettingsProvider } = await Promise.resolve().then(() => __importStar(require('@models/AIModelSettings')));
+            const { AIModelSettingsProvider } = await Promise.resolve().then(() => __importStar(require('../models/AIModelSettings')));
             const modelSettings = AIModelSettingsProvider.getSettings(config.aiModel);
             if (modelSettings) {
                 console.log(chalk_1.default.white('\n🤖 AI Model Status:'));

@@ -1,4 +1,4 @@
-import { ProjectConfig } from '@models/ProjectConfig';
+import { ProjectConfig } from '../models/ProjectConfig';
 export interface ConfigManagerOptions {
     enableBackup: boolean;
     maxBackups: number;

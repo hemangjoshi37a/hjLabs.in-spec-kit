@@ -38,8 +38,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TrackTasksCommand = void 0;
 const commander_1 = require("commander");
-const TaskTracker_1 = require("@services/TaskTracker");
-const ProjectDetector_1 = require("@services/ProjectDetector");
+const TaskTracker_1 = require("../services/TaskTracker");
+const ProjectDetector_1 = require("../services/ProjectDetector");
 const chalk_1 = __importDefault(require("chalk"));
 const fs = __importStar(require("fs-extra"));
 class TrackTasksCommand {

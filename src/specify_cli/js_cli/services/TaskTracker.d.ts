@@ -1,5 +1,5 @@
-import { TaskState } from '@models/TaskState';
-import { ProjectConfig } from '@models/ProjectConfig';
+import { TaskState } from '../models/TaskState';
+import { ProjectConfig } from '../models/ProjectConfig';
 export interface TaskTrackingOptions {
     enableRealTimeUpdates: boolean;
     autoSave: boolean;

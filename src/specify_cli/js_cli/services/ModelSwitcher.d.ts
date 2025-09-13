@@ -1,4 +1,4 @@
-import { ProjectConfig } from '@models/ProjectConfig';
+import { ProjectConfig } from '../models/ProjectConfig';
 import { ConfigManager } from './ConfigManager';
 export interface SwitchModelOptions {
     targetModel: 'claude' | 'gemini';

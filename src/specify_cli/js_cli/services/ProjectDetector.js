@@ -34,7 +34,7 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProjectDetector = void 0;
-const ProjectConfig_1 = require("@models/ProjectConfig");
+const ProjectConfig_1 = require("../models/ProjectConfig");
 const fs = __importStar(require("fs-extra"));
 const path = __importStar(require("path"));
 class ProjectDetector {
@@ -162,7 +162,7 @@ class ProjectDetector {
             });
         }
         // Validate AI model settings
-        const modelSettings = await Promise.resolve().then(() => __importStar(require('@models/AIModelSettings')));
+        const modelSettings = await Promise.resolve().then(() => __importStar(require('../models/AIModelSettings')));
         const settings = modelSettings.AIModelSettingsProvider.getSettings(config.aiModel);
         if (!settings) {
             issues.push({

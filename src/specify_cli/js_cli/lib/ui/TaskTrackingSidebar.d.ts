@@ -1,4 +1,4 @@
-import { TaskState } from '@models/TaskState';
+import { TaskState } from '../../models/TaskState';
 import blessed from 'blessed';
 export interface TaskTrackingSidebarOptions {
     position: 'left' | 'right';
