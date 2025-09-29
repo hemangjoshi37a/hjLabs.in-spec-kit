@@ -22,6 +22,3 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/specify_cli"]
 
-[tool.hatch.build.targets.wheel.force-include]
-".specify" = "specify_cli/.specify"
-"dist/cli/bundle.js" = "specify_cli/js_cli/bundle.js"
